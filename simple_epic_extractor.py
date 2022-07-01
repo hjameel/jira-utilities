@@ -38,7 +38,9 @@ jira = JIRA(
 
 def print_backlog_from(projects):
     epics = jira.search_issues(
-            f'project in ({",".join(projects)}) AND issuetype=Epic')
+            f'project in ({",".join(projects)}) AND issuetype=Epic '
+            f'AND status not in ({",".join(DONE_STATUSES)}) '
+            'order by status, rank')
     writer = csv.writer(sys.stdout)
     for epic in epics:
         writer.writerow([
@@ -52,7 +54,8 @@ def print_backlog_from(projects):
 def unfinished_points_in_stories_from(epic):
     child_stories = jira.search_issues(
                 f'"Epic Link"={epic.key} '
-                f'AND status not in ({",".join(DONE_STATUSES)}) order by status, rank')
+                f'AND status not in ({",".join(DONE_STATUSES)}) '
+                'order by status, rank')
     return sum(story_points_from(story) for story in child_stories
                if story_points_from(story) is not None)
 
