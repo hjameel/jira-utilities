@@ -1,14 +1,31 @@
-from jira import JIRA
+#!/usr/bin/env python
+
 import json
 
+from getpass import getpass
+from jira import JIRA
+from optparse import OptionParser
+
 DONE_STATUSES = 'Done'
+
+parser = OptionParser()
+parser.add_option("-s", "--server", dest="server")
+parser.add_option("-u", "--username", dest="username")
+parser.add_option("-p", "--password", dest="password")
+options, _ = parser.parse_args()
 
 with open('jira_config.json', 'r') as config_file:
     config = json.load(config_file)
 
+
 jira = JIRA(
-    options={'server': config['server']},
-    basic_auth=(config['email'], config['apitoken']))
+    options={
+        'server': options.server or config.get('server') or input("Server: ")
+        },
+    basic_auth=(
+        options.username or config.get('username') or input("Username: "),
+        options.password or getpass())
+    )
 
 
 def main():
@@ -30,4 +47,5 @@ def unfinished_points_in_stories_from(epic):
                if story.fields.customfield_10026 is not None)
 
 
-main()
+if __name__ == "__main__":
+    main()
