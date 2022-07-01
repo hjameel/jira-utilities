@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import json
+import sys
 
 from getpass import getpass
 from jira import JIRA
@@ -10,9 +11,11 @@ from story_points import initial_story_points_from, story_points_from
 DONE_STATUSES = 'Done'
 
 parser = OptionParser()
-parser.add_option("-s", "--server", dest="server")
-parser.add_option("-u", "--username", dest="username")
-parser.add_option("-p", "--password", dest="password")
+parser.add_option("-s", "--server", help="Target Jira server URL")
+parser.add_option("-u", "--username")
+parser.add_option("-p", "--password")
+parser.add_option("-P", "--project", dest="projects", action="append",
+                  help="Jira project to target. Multiple projects supported.")
 options, _ = parser.parse_args()
 
 with open('jira_config.json', 'r') as config_file:
@@ -29,8 +32,9 @@ jira = JIRA(
     )
 
 
-def main():
-    epics = jira.search_issues("project=TEAM AND issuetype=Epic")
+def print_backlog_from(projects):
+    epics = jira.search_issues(
+            f'project in ({",".join(projects)}) AND issuetype=Epic')
     for epic in epics:
         print(epic.key,
               epic.fields.status,
@@ -47,4 +51,8 @@ def unfinished_points_in_stories_from(epic):
 
 
 if __name__ == "__main__":
-    main()
+    if not options.projects:
+        print("No projects supplied", file=sys.stderr)
+        sys.exit(1)
+
+    print_backlog_from(options.projects)
