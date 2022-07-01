@@ -8,7 +8,6 @@ from jira import JIRA
 from optparse import OptionParser
 from story_points import initial_story_points_from, story_points_from
 
-DONE_STATUSES = 'Done'
 
 parser = OptionParser()
 parser.add_option("-s", "--server", help="Target Jira server URL")
@@ -21,6 +20,10 @@ options, _ = parser.parse_args()
 with open('jira_config.json', 'r') as config_file:
     config = json.load(config_file)
 
+DONE_STATUSES = config.get("done_statuses")
+if not DONE_STATUSES:
+    print("Done statuses not configured", file=sys.stderr)
+    sys.exit(1)
 
 jira = JIRA(
     options={
@@ -45,7 +48,7 @@ def print_backlog_from(projects):
 def unfinished_points_in_stories_from(epic):
     child_stories = jira.search_issues(
                 f'"Epic Link"={epic.key} '
-                f'AND status not in ({DONE_STATUSES}) order by status, rank')
+                f'AND status not in ({",".join(DONE_STATUSES)}) order by status, rank')
     return sum(story_points_from(story) for story in child_stories
                if story_points_from(story) is not None)
 
