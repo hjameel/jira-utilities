@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import csv
 import json
 import sys
 
@@ -38,11 +39,14 @@ jira = JIRA(
 def print_backlog_from(projects):
     epics = jira.search_issues(
             f'project in ({",".join(projects)}) AND issuetype=Epic')
+    writer = csv.writer(sys.stdout)
     for epic in epics:
-        print(epic.key,
-              epic.fields.status,
-              initial_story_points_from(epic),
-              unfinished_points_in_stories_from(epic))
+        writer.writerow([
+                        epic.key,
+                        epic.fields.status,
+                        initial_story_points_from(epic),
+                        unfinished_points_in_stories_from(epic)
+                        ])
 
 
 def unfinished_points_in_stories_from(epic):
