@@ -64,7 +64,7 @@ def unfinished_points_in_stories_from(epic):
 
 def print_story_backlog_from(projects, writer):
         stories = jira.search_issues(
-                "project=TEAM AND issuetype=Story "
+                f'project in ({",".join(projects)}) AND issuetype="Story" '
                 f'AND status not in ({",".join(DONE_STATUSES)}) '
                 'order by status, rank')
         for story in stories:
