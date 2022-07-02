@@ -24,6 +24,7 @@ with open('jira_config.json', 'r') as config_file:
     config = json.load(config_file)
 
 DONE_STATUSES = config.get("done_statuses")
+STORY_ISSUE_TYPES = config.get("story_issue_types")
 if not DONE_STATUSES:
     print("Done statuses not configured", file=sys.stderr)
     sys.exit(1)
@@ -38,7 +39,7 @@ jira = JIRA(
     )
 
 
-def print_epic_backlog_from(projects, writer):
+def print_epic_backlog_from(writer, projects):
     epics = jira.search_issues(
             f'project in ({",".join(projects)}) AND issuetype=Epic '
             f'AND status not in ({",".join(DONE_STATUSES)}) '
@@ -62,9 +63,10 @@ def unfinished_points_in_stories_from(epic):
                if story_points_from(story) is not None)
 
 
-def print_story_backlog_from(projects, writer):
+def print_story_backlog_from(writer, projects):
         stories = jira.search_issues(
-                f'project in ({",".join(projects)}) AND issuetype="Story" '
+                f'project in ({",".join(projects)}) '
+                f'AND issuetype in ({",".join(STORY_ISSUE_TYPES)}) '
                 f'AND status not in ({",".join(DONE_STATUSES)}) '
                 'order by status, rank')
         for story in stories:
@@ -83,6 +85,6 @@ if __name__ == "__main__":
     writer = csv.writer(sys.stdout)
 
     if options.storymode:
-        print_story_backlog_from(options.projects, writer)
+        print_story_backlog_from(writer, options.projects)
 
-    print_epic_backlog_from(options.projects, writer)
+    print_epic_backlog_from(writer, options.projects)
