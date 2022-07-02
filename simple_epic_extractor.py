@@ -38,12 +38,11 @@ jira = JIRA(
     )
 
 
-def print_backlog_from(projects):
+def print_epic_backlog_from(projects, writer):
     epics = jira.search_issues(
             f'project in ({",".join(projects)}) AND issuetype=Epic '
             f'AND status not in ({",".join(DONE_STATUSES)}) '
             'order by status, rank')
-    writer = csv.writer(sys.stdout)
     for epic in epics:
         writer.writerow([
                         epic.key,
@@ -63,17 +62,11 @@ def unfinished_points_in_stories_from(epic):
                if story_points_from(story) is not None)
 
 
-if __name__ == "__main__":
-    if not options.projects:
-        print("No projects supplied using the -P parameter", file=sys.stderr)
-        sys.exit(1)
-
-    if options.storymode:
+def print_story_backlog_from(projects, writer):
         stories = jira.search_issues(
                 "project=TEAM AND issuetype=Story "
                 f'AND status not in ({",".join(DONE_STATUSES)}) '
                 'order by status, rank')
-        writer = csv.writer(sys.stdout)
         for story in stories:
             writer.writerow([
                             story.key,
@@ -83,4 +76,13 @@ if __name__ == "__main__":
                             ])
 
 
-    print_backlog_from(options.projects)
+if __name__ == "__main__":
+    if not options.projects:
+        print("No projects supplied using the -P parameter", file=sys.stderr)
+        sys.exit(1)
+    writer = csv.writer(sys.stdout)
+
+    if options.storymode:
+        print_story_backlog_from(options.projects, writer)
+
+    print_epic_backlog_from(options.projects, writer)
