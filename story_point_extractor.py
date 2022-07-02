@@ -24,9 +24,13 @@ with open('jira_config.json', 'r') as config_file:
     config = json.load(config_file)
 
 DONE_STATUSES = config.get("done_statuses")
-STORY_ISSUE_TYPES = config.get("story_issue_types")
 if not DONE_STATUSES:
     print("Done statuses not configured", file=sys.stderr)
+    sys.exit(1)
+
+STORY_ISSUE_TYPES = config.get("story_issue_types")
+if not STORY_ISSUE_TYPES:
+    print("Story issue types not configured", file=sys.stderr)
     sys.exit(1)
 
 jira = JIRA(
