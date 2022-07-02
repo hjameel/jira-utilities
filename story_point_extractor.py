@@ -20,6 +20,10 @@ parser.add_option("-S", "--storymode", action="store_true",
                   help="Extract points for stories rather than epics")
 options, _ = parser.parse_args()
 
+if not options.projects:
+    print("No projects supplied using the -P parameter", file=sys.stderr)
+    sys.exit(1)
+
 with open('jira_config.json', 'r') as config_file:
     config = json.load(config_file)
 
@@ -90,8 +94,4 @@ def unfinished_points_in_stories_from(epic):
 
 
 if __name__ == "__main__":
-    if not options.projects:
-        print("No projects supplied using the -P parameter", file=sys.stderr)
-        sys.exit(1)
-
     print_story_points()
