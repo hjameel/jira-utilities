@@ -43,19 +43,41 @@ jira = JIRA(
     )
 
 
-def print_epic_backlog_from(writer, projects):
-    epics = jira.search_issues(
-            f'project in ({",".join(projects)}) AND issuetype=Epic '
-            f'AND status not in ({",".join(DONE_STATUSES)}) '
-            'order by status, rank')
-    for epic in epics:
-        writer.writerow([
-                        epic.key,
-                        epic.fields.summary,
-                        epic.fields.status,
-                        initial_story_points_from(epic),
-                        unfinished_points_in_stories_from(epic)
-                        ])
+def print_story_points():
+    writer = csv.writer(sys.stdout)
+
+    def print_epic_backlog_from(projects):
+        epics = jira.search_issues(
+                f'project in ({",".join(projects)}) AND issuetype=Epic '
+                f'AND status not in ({",".join(DONE_STATUSES)}) '
+                'order by status, rank')
+        for epic in epics:
+            writer.writerow([
+                            epic.key,
+                            epic.fields.summary,
+                            epic.fields.status,
+                            initial_story_points_from(epic),
+                            unfinished_points_in_stories_from(epic)
+                            ])
+
+    def print_story_backlog_from(projects):
+            stories = jira.search_issues(
+                    f'project in ({",".join(projects)}) '
+                    f'AND issuetype in ({",".join(STORY_ISSUE_TYPES)}) '
+                    f'AND status not in ({",".join(DONE_STATUSES)}) '
+                    'order by status, rank')
+            for story in stories:
+                writer.writerow([
+                                story.key,
+                                story.fields.summary,
+                                story.fields.status,
+                                initial_story_points_from(story)
+                                ])
+
+    if options.storymode:
+        print_story_backlog_from(options.projects)
+    else:
+        print_epic_backlog_from(options.projects)
 
 
 def unfinished_points_in_stories_from(epic):
@@ -67,28 +89,9 @@ def unfinished_points_in_stories_from(epic):
                if story_points_from(story) is not None)
 
 
-def print_story_backlog_from(writer, projects):
-        stories = jira.search_issues(
-                f'project in ({",".join(projects)}) '
-                f'AND issuetype in ({",".join(STORY_ISSUE_TYPES)}) '
-                f'AND status not in ({",".join(DONE_STATUSES)}) '
-                'order by status, rank')
-        for story in stories:
-            writer.writerow([
-                            story.key,
-                            story.fields.summary,
-                            story.fields.status,
-                            initial_story_points_from(story)
-                            ])
-
-
 if __name__ == "__main__":
     if not options.projects:
         print("No projects supplied using the -P parameter", file=sys.stderr)
         sys.exit(1)
-    writer = csv.writer(sys.stdout)
 
-    if options.storymode:
-        print_story_backlog_from(writer, options.projects)
-    else:
-        print_epic_backlog_from(writer, options.projects)
+    print_story_points()
