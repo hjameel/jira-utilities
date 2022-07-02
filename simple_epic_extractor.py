@@ -86,5 +86,5 @@ if __name__ == "__main__":
 
     if options.storymode:
         print_story_backlog_from(writer, options.projects)
-
-    print_epic_backlog_from(writer, options.projects)
+    else:
+        print_epic_backlog_from(writer, options.projects)
