@@ -5,6 +5,6 @@ def initial_story_points_from(epic):
 
 
 def story_points_from(story):
-    """Story point estimate set on an story"""
+    """Story point estimate set on a story"""
 
     return story.fields.customfield_10026

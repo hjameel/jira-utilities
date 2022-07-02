@@ -108,4 +108,8 @@ venv.bak/
 .ipython
 .local
 .jupyter
+
+# editor
+*.swp
+
 jira_config.json

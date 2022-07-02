@@ -16,6 +16,8 @@ parser.add_option("-u", "--username")
 parser.add_option("-p", "--password")
 parser.add_option("-P", "--project", dest="projects", action="append",
                   help="Jira project to target. Multiple projects supported.")
+parser.add_option("-S", "--storymode", action="store_true",
+                  help="Extract points for stories rather than epics")
 options, _ = parser.parse_args()
 
 with open('jira_config.json', 'r') as config_file:
@@ -45,6 +47,7 @@ def print_backlog_from(projects):
     for epic in epics:
         writer.writerow([
                         epic.key,
+                        epic.fields.summary,
                         epic.fields.status,
                         initial_story_points_from(epic),
                         unfinished_points_in_stories_from(epic)
@@ -62,7 +65,22 @@ def unfinished_points_in_stories_from(epic):
 
 if __name__ == "__main__":
     if not options.projects:
-        print("No projects supplied", file=sys.stderr)
+        print("No projects supplied using the -P parameter", file=sys.stderr)
         sys.exit(1)
+
+    if options.storymode:
+        stories = jira.search_issues(
+                "project=TEAM AND issuetype=Story "
+                f'AND status not in ({",".join(DONE_STATUSES)}) '
+                'order by status, rank')
+        writer = csv.writer(sys.stdout)
+        for story in stories:
+            writer.writerow([
+                            story.key,
+                            story.fields.summary,
+                            story.fields.status,
+                            initial_story_points_from(story)
+                            ])
+
 
     print_backlog_from(options.projects)
