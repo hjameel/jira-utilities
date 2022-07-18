@@ -75,7 +75,7 @@ def print_story_points():
                                 story.key,
                                 story.fields.summary,
                                 story.fields.status,
-                                initial_story_points_from(story)
+                                story_points_from(story)
                                 ])
 
     if options.storymode:
