@@ -54,7 +54,8 @@ def print_story_points():
         epics = jira.search_issues(
                 f'project in ({",".join(projects)}) AND issuetype=Epic '
                 f'AND status not in ({",".join(DONE_STATUSES)}) '
-                'order by status, rank')
+                'order by status, rank',
+                maxResults=None)
         for epic in epics:
             writer.writerow([
                             epic.key,
@@ -69,7 +70,8 @@ def print_story_points():
                     f'project in ({",".join(projects)}) '
                     f'AND issuetype in ({",".join(STORY_ISSUE_TYPES)}) '
                     f'AND status not in ({",".join(DONE_STATUSES)}) '
-                    'order by status, rank')
+                    'order by status, rank',
+                    maxResults=None)
             for story in stories:
                 writer.writerow([
                                 story.key,
